@@ -111,10 +111,6 @@ fn encode(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
     let mut a = block[0].wrapping_add(subkeys[0]);
     let mut b = block[1].wrapping_add(subkeys[1]);
 
-    // In each round:
-    // Bitwise xor
-    // left circular shit
-    // addition to to the next subkey
     for i in 1..=R {
         a = a ^ b;
         a = a
