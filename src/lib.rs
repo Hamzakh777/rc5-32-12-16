@@ -52,11 +52,10 @@ pub fn expand_key(key: &Vec<u8>) -> Result<Vec<u32>, RC5Error> {
     // Generate a set of round keys from the user-supplied key.
     // the user Key is split into NUMBER_OF_WORDS_IN_KEY words, where each word is W bit long
     let mut words: Vec<u32> = vec![WORDS_SIZE_ZERO; NUMBER_OF_WORDS_IN_KEY as usize];
-    let u = NUMBER_OF_BYTES_IN_WORD as usize;
     // we are using `rev` to ensure that the bytes of the key are processed form the last byte to the first byte
     // iterating over the key bytes in reverse order, shifting and combining them into 32-bit words.
     for i in (0..B).rev() {
-        let current_word_index = i / u;
+        let current_word_index = i / (NUMBER_OF_BYTES_IN_WORD as usize);
         words[current_word_index] =
             (words[current_word_index].wrapping_shl(8u32)).wrapping_add(key[i] as u32);
     }
