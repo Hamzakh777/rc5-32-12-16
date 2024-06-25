@@ -7,7 +7,7 @@ pub enum RC5Error {
 
     #[error("invalid plaintext length")]
     InvalidPlainTextLength,
-    
+
     #[error("invalid cyphertext length")]
     InvalidCypherTextLength,
 }
