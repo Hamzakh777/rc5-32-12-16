@@ -100,7 +100,7 @@ fn encode(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
     }
 
     let mut ciphertext = Vec::new();
-    let expanded_key = expand_key(&key)?;
+    let subkeys = expand_key(&key)?;
 
     // its safe to use unwrap here because we already verified the plaintext length
     let block: [u32; 2] = [
@@ -108,8 +108,8 @@ fn encode(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
         u32::from_le_bytes(plaintext[4..8].try_into().unwrap()),
     ];
 
-    let mut a = block[0].wrapping_add(expanded_key[0]);
-    let mut b = block[1].wrapping_add(expanded_key[1]);
+    let mut a = block[0].wrapping_add(subkeys[0]);
+    let mut b = block[1].wrapping_add(subkeys[1]);
 
     // In each round:
     // Bitwise xor
@@ -119,11 +119,11 @@ fn encode(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
         a = a ^ b;
         a = a
             .rotate_left(b % W as u32)
-            .wrapping_add(expanded_key[2 * i]);
+            .wrapping_add(subkeys[2 * i]);
         b = b ^ a;
         b = b
             .rotate_left(a % W as u32)
-            .wrapping_add(expanded_key[2 * i + 1]);
+            .wrapping_add(subkeys[2 * i + 1]);
     }
 
     a.to_le_bytes().map(|el| ciphertext.push(el));
@@ -142,7 +142,7 @@ fn decode(key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
 
     let mut plaintext = Vec::new();
 
-    let expanded_key = expand_key(&key)?;
+    let subkeys = expand_key(&key)?;
 
     // its safe to use unwrap here because we already verified the plaintext length
     let block: [u32; 2] = [
@@ -155,19 +155,19 @@ fn decode(key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, RC5Error> {
 
     for i in (1..=R).rev() {
         b = b
-            .wrapping_sub(expanded_key[2 * i + 1])
+            .wrapping_sub(subkeys[2 * i + 1])
             .rotate_right(a % W as u32)
             ^ a;
         a = a
-            .wrapping_sub(expanded_key[2 * i])
+            .wrapping_sub(subkeys[2 * i])
             .rotate_right(b % W as u32)
             ^ b
     }
 
-    a.wrapping_sub(expanded_key[0])
+    a.wrapping_sub(subkeys[0])
         .to_le_bytes()
         .map(|el| plaintext.push(el));
-    b.wrapping_sub(expanded_key[1])
+    b.wrapping_sub(subkeys[1])
         .to_le_bytes()
         .map(|el| plaintext.push(el));
 
