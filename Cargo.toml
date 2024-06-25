@@ -1,0 +1,9 @@
+[package]
+name = "rc5_test"
+version = "0.1.0"
+authors = ["Ben Marsh <ben.marsh@mintlayer.org>"]
+edition = "2018"
+
+[dependencies]
+num = "0.4.3"
+thiserror = "1.0.61"
